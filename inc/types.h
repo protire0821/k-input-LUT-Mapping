@@ -17,8 +17,8 @@
 
 // One SOP (Sum-Of-Products) term, e.g. "10-1 1"
 struct SopTerm {
-    std::string pattern; // inputs pattern, chars in {'0','1','-'}
-    char onset;          // '1' or '0'
+    std::vector<int> pattern; // inputs pattern, int {0, 1, -1} for '0','1','-' respectively}
+    int onset;                // 1 or 0
 };
 
 // One .names block

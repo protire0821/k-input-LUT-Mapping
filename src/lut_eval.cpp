@@ -1,23 +1,31 @@
-#include "lut_eval.h"
-
+#include "../inc/lut_eval.h"
 #include <iostream>
 
 void LutEval::enumerateCuts(const Aig& aig) {
-    // TODO:
-    // For each AIG node in topological order:
-    //   - If PI or CONST: trivial cut { {self} }.
-    //   - If AND(a,b): merge cuts of a and b, keep only cuts with |leaves| <= k_,
-    //                  drop dominated cuts, append trivial {self} cut.
+    // TODO
     (void)aig;
 }
 
 void LutEval::selectCuts(const Aig& aig) {
-    // TODO:
-    // Choose cut per node to minimize Cost = Level * |LUTs|.
-    // Typical flow:
-    //   1. Forward pass: compute best cut per node w.r.t. some heuristic
-    //      (area-flow / depth-optimal / area-oriented).
-    //   2. Backward traversal from POs: mark required cuts -> luts_.
-    //   3. Fill luts_ with truth tables + input/output names.
+    // TODO
     (void)aig;
+}
+
+void LutEval::print() const {
+    std::cout << "LutEval (k=" << k_ << ")\n";
+    std::cout << "  LUTs selected: " << luts_.size() << "\n\n";
+
+    for (size_t i = 0; i < luts_.size(); ++i) {
+        const Lut& lut = luts_[i];
+        std::cout << "  LUT[" << i << "]: (";
+        for (size_t j = 0; j < lut.inputs.size(); ++j)
+            std::cout << lut.inputs[j] << (j + 1 < lut.inputs.size() ? ", " : "");
+        std::cout << ") -> " << lut.output << "\n";
+        for (size_t ti = 0; ti < lut.terms.size(); ++ti) {
+            const SopTerm& t = lut.terms[ti];
+            std::cout << "    [" << ti << "] [";
+            for (int v : t.pattern) std::cout << v << " ";
+            std::cout << "] onset=" << t.onset << "\n";
+        }
+    }
 }

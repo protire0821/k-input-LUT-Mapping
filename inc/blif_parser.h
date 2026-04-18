@@ -2,6 +2,7 @@
 #define BLIF_PARSER_H
 
 #include <string>
+#include <fstream>
 #include <vector>
 #include "types.h"
 
@@ -11,6 +12,7 @@ public:
     ~BlifParser() = default;
 
     bool parse(const std::string& filePath);
+    void print() const;
 
     const BlifNetwork& getNetwork() const { return network_; }
 
