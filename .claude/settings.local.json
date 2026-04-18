@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth *)",
+      "Bash(git --version)",
+      "Bash(git -C D:/Code/CAD_for_VLSI_Design/PA2 status)",
+      "Bash(winget install *)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(gh --version)"
+    ]
+  }
+}
