@@ -1,58 +1,28 @@
-# ============================================================================
-# Makefile for PA2: k-input LUT Mapping
-# ----------------------------------------------------------------------------
-# Targets:
-#   make all     -> compile source code and generate executable
-#   make run input=<input.blif> output=<output.blif> k=<number, 2~10>
-#   make clean   -> remove objects and executable
-# ============================================================================
-
-CXX       := g++
-CXXFLAGS  := -std=c++17 -O0 -Wall -Iinc
-
-TARGET    := 114521123_PA2
-
-SRC_DIR   := src
-INC_DIR   := inc
-OBJ_DIR   := obj
-
-MAIN_SRC  := 114521123_PA2.cpp
-SRCS      := $(wildcard $(SRC_DIR)/*.cpp)
-OBJS      := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS)) $(OBJ_DIR)/$(basename $(MAIN_SRC)).o
-
+# Makefile for PA2
+.PHONY: all run clean
 # ---------- build ----------
-all: $(TARGET)
-
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-$(OBJ_DIR)/$(basename $(MAIN_SRC)).o: $(MAIN_SRC) | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+all: pa2_main.o pa2_blif_parser.o pa2_aig_builder.o
+	@g++ -std=c++17 pa2_main.o pa2_blif_parser.o pa2_aig_builder.o -o 114521123_PA2
 
 # ---------- run ----------
-# Usage: make run input=<input.blif> output=<output.blif> k=<2~10>
+# make run input=<input.blif> output=<output.blif> k=<2~10>
 run: all
-	./$(TARGET) -input $(input) -output $(output) -k $(k)
-
-# ---------- test ----------
-TEST_SRC  := test/test_blif_parser.cpp
-TEST_SRCS := $(filter-out $(SRC_DIR)/blif_writer.cpp $(SRC_DIR)/lut_eval.cpp $(SRC_DIR)/aig_builder.cpp, $(SRCS))
-TEST_BIN  := test_blif_parser
-
-test: $(TEST_BIN)
-	./$(TEST_BIN)
-
-$(TEST_BIN): $(TEST_SRC) $(TEST_SRCS) | $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	@./114521123_PA2 -input $(input) -output $(output) -k $(k)
 
 # ---------- clean ----------
 clean:
-	rm -rf $(OBJ_DIR) $(TARGET) $(TEST_BIN)
+	@rm *.o
+	@rm 114521123_PA2
 
-.PHONY: all run test clean
+# ---------- compile ----------
+pa2_main.o: 114521123_PA2.cpp
+	@g++ -std=c++17 -c 114521123_PA2.cpp
+
+pa2_blif_parser.o: inc/blif_parser.h src/blif_parser.cpp
+	@g++ -std=c++17 -c src/blif_parser.cpp
+
+pa2_aig_builder.o: inc/aig_builder.h src/aig_builder.cpp
+	@g++ -std=c++17 -c src/aig_builder.cpp
+
+
+

@@ -11,18 +11,18 @@
 #include <iostream>
 #include <string>
 
-#include "types.h"
-#include "blif_parser.h"
-#include "aig_builder.h"
-#include "lut_eval.h"
-#include "blif_writer.h"
+#include "inc/types.h"
+#include "inc/blif_parser.h"
+#include "inc/aig_builder.h"
+#include "inc/lut_eval.h"
+#include "inc/blif_writer.h"
 
 int main(int argc, char* argv[]) {
-    // TODO: parse command line arguments (-input, -output, -k)
+    std::string inputPath = argv[1];
+    std::string outputPath = argv[2];
 
-    // TODO: Step 1. Parse BLIF
-    // BlifParser parser;
-    // parser.parse(inputPath);
+    BlifParser parser;
+    parser.parse(inputPath);
 
     // TODO: Step 2. Build AIG from parsed network
     // AigBuilder aigBuilder;
@@ -37,6 +37,6 @@ int main(int argc, char* argv[]) {
     // BlifWriter writer;
     // writer.write(outputPath, ...);
 
-    (void)argc; (void)argv;
+    // (void)argc; (void)argv;
     return 0;
 }
