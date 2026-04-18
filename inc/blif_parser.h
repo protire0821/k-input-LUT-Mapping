@@ -2,6 +2,7 @@
 #define BLIF_PARSER_H
 
 #include <string>
+#include <vector>
 #include "types.h"
 
 class BlifParser {
@@ -9,22 +10,16 @@ public:
     BlifParser() = default;
     ~BlifParser() = default;
 
-    // Parse BLIF file. Returns true on success.
     bool parse(const std::string& filePath);
 
-    // Accessor for parsed network.
     const BlifNetwork& getNetwork() const { return network_; }
 
 private:
     BlifNetwork network_;
 
-    // --- Helpers (to be implemented) ---
-    // void handleLineContinuations(...);
-    // void stripComments(...);
-    // void parseModel(...);
-    // void parseInputs(...);
-    // void parseOutputs(...);
-    // void parseNames(...);
+    static void stripComment(std::string& line);
+    static bool readLogicalLine(std::ifstream& f, std::string& out);
+    static void tokenize(const std::string& line, std::vector<std::string>& tokens);
 };
 
 #endif // BLIF_PARSER_H

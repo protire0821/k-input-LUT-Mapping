@@ -8,7 +8,7 @@
 # ============================================================================
 
 CXX       := g++
-CXXFLAGS  := -std=c++17 -O2 -Wall -Iinc
+CXXFLAGS  := -std=c++17 -O0 -Wall -Iinc
 
 TARGET    := 114521123_PA2
 
@@ -40,8 +40,19 @@ $(OBJ_DIR):
 run: all
 	./$(TARGET) -input $(input) -output $(output) -k $(k)
 
+# ---------- test ----------
+TEST_SRC  := test/test_blif_parser.cpp
+TEST_SRCS := $(filter-out $(SRC_DIR)/blif_writer.cpp $(SRC_DIR)/lut_eval.cpp $(SRC_DIR)/aig_builder.cpp, $(SRCS))
+TEST_BIN  := test_blif_parser
+
+test: $(TEST_BIN)
+	./$(TEST_BIN)
+
+$(TEST_BIN): $(TEST_SRC) $(TEST_SRCS) | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
 # ---------- clean ----------
 clean:
-	rm -rf $(OBJ_DIR) $(TARGET)
+	rm -rf $(OBJ_DIR) $(TARGET) $(TEST_BIN)
 
-.PHONY: all run clean
+.PHONY: all run test clean
