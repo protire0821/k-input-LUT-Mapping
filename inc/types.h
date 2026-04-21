@@ -1,7 +1,3 @@
-// ============================================================================
-// inc/types.h
-// Common data structures shared across modules.
-// ============================================================================
 #ifndef TYPES_H
 #define TYPES_H
 
@@ -11,24 +7,20 @@
 #include <unordered_set>
 #include <cstdint>
 
-// ----------------------------------------------------------------------------
-// BLIF-level structures (produced by BlifParser)
-// ----------------------------------------------------------------------------
 
-// One SOP (Sum-Of-Products) term, e.g. "10-1 1"
+// SOP (Sum-Of-Products, one line) term, e.g. "10-1 1"
 struct SopTerm {
-    std::vector<int> pattern; // inputs pattern, int {0, 1, -1} for '0','1','-' respectively}
+    std::vector<int> pattern; // inputs pattern, int{0, 1, -1} for '0','1','-'
     int onset;                // 1 or 0
 };
 
-// One .names block
+// .names block
 struct NamesBlock {
     std::vector<std::string> inputs; // input signal names
     std::string              output; // output signal name
     std::vector<SopTerm>     terms;  // SOP rows
 };
 
-// Parsed BLIF model
 struct BlifNetwork {
     std::string              modelName;
     std::vector<std::string> primaryInputs;
@@ -36,12 +28,8 @@ struct BlifNetwork {
     std::vector<NamesBlock>  namesBlocks;
 };
 
-// ----------------------------------------------------------------------------
-// AIG structures (produced by AigBuilder)
-// ----------------------------------------------------------------------------
-
-using NodeId = int32_t;          // AIG node id
-using AigLit = int32_t;          // AIG literal: (id << 1) | invert
+using NodeId = int32_t;  // AIG node id
+using AigLit = int32_t;  // AIG literal: (id << 1) | invert_bit
 
 enum class AigNodeType {
     CONST0,  // constant 0
@@ -63,10 +51,6 @@ struct Aig {
     std::vector<AigLit>                     primaryOutputs;// order preserved (literals)
     std::unordered_map<std::string, AigLit> nameToLit;     // signal name -> AIG literal
 };
-
-// ----------------------------------------------------------------------------
-// Cut / LUT structures (produced by LutEval)
-// ----------------------------------------------------------------------------
 
 struct Cut {
     std::vector<NodeId> leaves;  // cut inputs (AIG node ids)
