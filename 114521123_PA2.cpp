@@ -12,7 +12,8 @@
 
 #include "inc/blif_parser.h"
 #include "inc/aig_builder.h"
-#include "inc/lut_eval.h"
+#include "inc/cut_selector.h"
+#include "inc/lut_builder.h"
 #include "inc/blif_writer.h"
 
 int main(int argc, char* argv[]) {
@@ -36,19 +37,31 @@ int main(int argc, char* argv[]) {
     if (!parser.parse(inputPath)) return 1;
     parser.print();
 
-    // TODO: Step 2. Build AIG
-    // AigBuilder builder;
-    // builder.build(parser.getNetwork());
+    // Step 2: Build AIG
+    AigBuilder builder;
+    if (!builder.build(parser.getNetwork())) return 1;
+    builder.print();
 
-    // TODO: Step 3. LUT Mapping
-    // LutEval eval(k);
-    // eval.enumerateCuts(builder.getAig());
-    // eval.selectCuts(builder.getAig());
+    // Step 3a: Cut enumeration (Phase 1), depth mapping (Phase 2), area recovery (Phase 3)
+    CutSelector cuts(k);
+    cuts.enumerateCuts(builder.getAig());
+    cuts.depthMapping(builder.getAig());
+    cuts.areaRecovery(builder.getAig());
+    cuts.print();
 
-    // TODO: Step 4. Write output BLIF
-    // BlifWriter writer;
-    // writer.write(outputPath, ...);
+    // Step 3b: LUT truth-table extraction
+    LutBuilder eval(k);
+    eval.buildLuts(builder.getAig(), cuts.getBestCuts());
+    eval.print();
 
-    (void)k;
+    // Step 4: Write output BLIF
+    BlifWriter writer;
+    if (!writer.write(outputPath,
+                      parser.getNetwork().modelName,
+                      parser.getNetwork().primaryInputs,
+                      parser.getNetwork().primaryOutputs,
+                      eval.getLuts())) return 1;
+    writer.print();
+
     return 0;
 }

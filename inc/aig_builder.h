@@ -3,16 +3,14 @@
 
 #include <unordered_map>
 #include <utility>
-#include <cstdint>
 #include "types.h"
 
 class AigBuilder {
 public:
     AigBuilder() = default;
-    ~AigBuilder() = default;
 
-    bool build(const BlifNetwork& network);
-    void print() const;
+    bool build   (const BlifNetwork& network);
+    void print   () const;
 
     const Aig& getAig() const { return aig_; }
 
@@ -26,13 +24,7 @@ private:
     };
     std::unordered_map<std::pair<AigLit,AigLit>, AigLit, PairHash> andCache_;
 
-    AigLit litOf   (NodeId id, bool invert = false) { return (id << 1) | (int)invert; }
-    AigLit makeNot (AigLit a)                       { return a ^ 1; }
-    AigLit makeAnd (AigLit a, AigLit b);
-    AigLit makeOr  (AigLit a, AigLit b)             { return makeNot(makeAnd(makeNot(a), makeNot(b))); }
-
-    AigLit buildSopTerm   (const SopTerm& term, const std::vector<std::string>& inputs);
-    AigLit buildNamesBlock(const NamesBlock& block);
+    AigLit makeAnd(AigLit a, AigLit b); // structural hashing — too complex to inline
 };
 
 #endif // AIG_BUILDER_H

@@ -4,8 +4,10 @@
 *.out
 *.exe
 
-# Build artifacts
-obj/
+output/
+abc/
+
+*.pdf
 
 # IDE files
 .vscode/

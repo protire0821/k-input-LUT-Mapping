@@ -53,7 +53,14 @@
       "Bash(g++ -std=c++17 -c src/lut_eval.cpp -o pa2_lut_eval.o)",
       "Bash(./114521123_PA2 -input testcase/testcase1.blif -output testcase/out1.blif -k 4)",
       "Bash(./114521123_PA2.exe -input testcase/testcase1.blif -output testcase/out1.blif -k 4)",
-      "Bash(D:/Code/CAD_for_VLSI_Design/PA2/114521123_PA2 -input testcase/testcase1.blif -output testcase/out1.blif -k 4)"
+      "Bash(D:/Code/CAD_for_VLSI_Design/PA2/114521123_PA2 -input testcase/testcase1.blif -output testcase/out1.blif -k 4)",
+      "Bash(g++ -std=c++17 pa2_main.o pa2_blif_parser.o pa2_aig_builder.o pa2_blif_writer.o pa2_lut_eval.o -o 114521123_PA2)",
+      "Bash(g++ -std=c++17 -c 114521123_PA2.cpp   -o pa2_main.o)",
+      "Bash(g++ -std=c++17 -c src/lut_eval.cpp    -o pa2_lut_eval.o)",
+      "Bash(cmd.exe /c \"114521123_PA2 -input testcase/testcase1.blif -output testcase/out1.blif -k 4\")",
+      "Bash(powershell.exe -Command \"./114521123_PA2 -input testcase/testcase1.blif -output testcase/out1.blif -k 4\")",
+      "Bash(powershell.exe -Command \"cd D:\\\\\\\\Code\\\\\\\\CAD_for_VLSI_Design\\\\\\\\PA2; make clean; make all 2>&1\")",
+      "Bash(powershell.exe -Command \"cd 'D:\\\\\\\\Code\\\\\\\\CAD_for_VLSI_Design\\\\\\\\PA2'; mingw32-make clean; mingw32-make all 2>&1\")"
     ]
   }
 }
