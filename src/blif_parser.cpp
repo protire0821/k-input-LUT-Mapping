@@ -124,6 +124,7 @@ bool BlifParser::parse(const std::string& filePath) {
     return true;
 }
 
+
 void BlifParser::print() const {
     const BlifNetwork& net = network_;
     std::cout << "\n======BLIF Parse Results======" << std::endl;

@@ -3,12 +3,7 @@
 #include <algorithm>
 #include <unordered_set>
 
-// ─── static helpers ──────────────────────────────────────────────────────────
-
-// Evaluate AIG node `target` given a partial assignment to leaf nodes.
-// Traverses nodes in id-order (= topological order) up to `target`.
-static int evalNode(const Aig& aig, NodeId target,
-                    const std::unordered_map<NodeId,int>& leafVals) {
+static int evalNode(const Aig& aig, NodeId target, const std::unordered_map<NodeId,int>& leafVals) {
     std::unordered_map<NodeId,int> vals = leafVals;
     vals[0] = 0; // CONST0
 
@@ -27,24 +22,15 @@ static int evalNode(const Aig& aig, NodeId target,
     return vals.count(target) ? vals[target] : 0;
 }
 
-// ─── LutBuilder::buildLuts ───────────────────────────────────────────────────
-//
-// 1. Backward pass from POs  — collect all required AND nodes.
-// 2. For each required node  — enumerate 2^|leaves| input combos,
-//                              record minterms, assemble Lut.
-// 3. Inverter LUTs           — for signals whose BLIF name is an inverted
-//                              output of a required node.
 
 void LutBuilder::buildLuts(const Aig& aig,
                             const std::unordered_map<NodeId, Cut>& bestCuts) {
     luts_.clear();
 
-    // ── Build reverse maps from aig.nameToLit ────────────────────────────────
-    // posLitToName : positive AIG literal  → BLIF signal name
-    // invNodeToName: AND node id whose inverted output has a BLIF name → name
-    std::unordered_map<AigLit,std::string> posLitToName;
-    std::unordered_map<NodeId,std::string> invNodeToName;
+    std::unordered_map<AigLit,std::string> posLitToName;    // AIG literal  → BLIFname
+    std::unordered_map<NodeId,std::string> invNodeToName;   // AND node id → BLIF name for its inverted output
 
+    // Pre-compute name mappings.
     for (const auto& [name, lit] : aig.nameToLit) {
         NodeId nd = lit >> 1;
         if (!(lit & 1)) {
@@ -55,7 +41,7 @@ void LutBuilder::buildLuts(const Aig& aig,
         }
     }
 
-    // Helper: return the BLIF signal name for a node's positive output.
+    // return the BLIF name for node's positive output.
     auto getNodeName = [&](NodeId nd) -> std::string {
         auto it = posLitToName.find(nd << 1);
         if (it != posLitToName.end()) return it->second;
@@ -64,7 +50,7 @@ void LutBuilder::buildLuts(const Aig& aig,
         return "n" + std::to_string(nd);
     };
 
-    // ── 1. Backward pass: collect required AND nodes ──────────────────────────
+    // 1. Backward pass: collect required AND nodes
     std::unordered_set<NodeId> required;
     std::vector<NodeId>        worklist;
 
@@ -91,12 +77,7 @@ void LutBuilder::buildLuts(const Aig& aig,
         }
     }
 
-    // ── 2. Build LUTs for required AND nodes (topological / id order) ─────────
-    //
-    // If node nd has an inverted BLIF name (e.g. v12.0 = NOT(n16)) AND its
-    // positive output is not used as a leaf by any other required node, absorb
-    // the inversion directly into this LUT (invert truth table, rename output).
-    // This avoids a separate 1-input inverter LUT that would add one depth level.
+    // 2. Build LUTs for required AND nodes (topological / id order)
 
     // Pre-compute which nodes appear as leaves in other required nodes' cuts.
     std::unordered_set<NodeId> usedAsLeaf;
@@ -107,7 +88,6 @@ void LutBuilder::buildLuts(const Aig& aig,
             if (leaf != req) usedAsLeaf.insert(leaf);
     }
 
-    // Nodes whose inversion was absorbed into Step 2 — skip in Step 3.
     std::unordered_set<NodeId> invertedAbsorbed;
 
     for (const AigNode& node : aig.nodes) {
@@ -150,9 +130,7 @@ void LutBuilder::buildLuts(const Aig& aig,
         luts_.push_back(lut);
     }
 
-    // ── 3. Inverter LUTs for signals named via inverted AND outputs ───────────
-    // Only emit an inverter LUT when the node's positive output is used as a
-    // leaf elsewhere (so we can't absorb the inversion into the parent LUT).
+    // 3. Inverter LUTs for signals named via inverted AND outputs
     for (const auto& [nd, name] : invNodeToName) {
         if (!required.count(nd))        continue;
         if (invertedAbsorbed.count(nd)) continue;
@@ -166,7 +144,6 @@ void LutBuilder::buildLuts(const Aig& aig,
     }
 }
 
-// ─── LutBuilder::print ───────────────────────────────────────────────────────
 
 void LutBuilder::print() const {
     std::cout << "\n======LUT Builder Results======\n";
