@@ -38,29 +38,29 @@ int main(int argc, char* argv[]) {
     parser.print();
 
     // Step 2: Build AIG
-    AigBuilder builder;
-    if (!builder.build(parser.getNetwork())) return 1;
-    builder.print();
+    AigBuilder aig_builder;
+    if (!aig_builder.build(parser.getNetwork())) return 1;
+    aig_builder.print();
 
-    // Step 3a: Cut enumeration (Phase 1), depth mapping (Phase 2), area recovery (Phase 3)
+    // Step 3: Cut enumeration (Phase 1), depth mapping (Phase 2), area recovery (Phase 3)
     CutSelector cuts(k);
-    cuts.enumerateCuts(builder.getAig());
-    cuts.depthMapping(builder.getAig());
-    cuts.areaRecovery(builder.getAig());
+    cuts.enumerateCuts(aig_builder.getAig());
+    cuts.depthMapping(aig_builder.getAig());
+    cuts.areaRecovery(aig_builder.getAig());
     cuts.print();
 
-    // Step 3b: LUT truth-table extraction
-    LutBuilder eval(k);
-    eval.buildLuts(builder.getAig(), cuts.getBestCuts());
-    eval.print();
+    // Step 4: LUT truth-table extraction
+    LutBuilder luts(k);
+    luts.buildLuts(aig_builder.getAig(), cuts.getBestCuts());
+    luts.print();
 
-    // Step 4: Write output BLIF
+    // Step 5: Write output BLIF
     BlifWriter writer;
     if (!writer.write(outputPath,
                       parser.getNetwork().modelName,
                       parser.getNetwork().primaryInputs,
                       parser.getNetwork().primaryOutputs,
-                      eval.getLuts())) return 1;
+                      luts.getLuts())) return 1;
     writer.print();
 
     return 0;

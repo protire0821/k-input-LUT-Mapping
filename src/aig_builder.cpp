@@ -28,19 +28,16 @@ bool AigBuilder::build(const BlifNetwork& network) {
     aig_      = {};
     andCache_ = {};
 
-    // ── Constants ────────────────────────────────────────────────────────────
     // node 0 = CONST0,  lit 0 = CONST0,  lit 1 = CONST1  (NOT CONST0)
     aig_.nodes.push_back({0, AigNodeType::CONST0});
 
-    // ── Primary inputs ───────────────────────────────────────────────────────
+    // Primary inputs 
     for (const std::string& name : network.primaryInputs) {
         NodeId id = (NodeId)aig_.nodes.size();
         aig_.nodes.push_back({id, AigNodeType::PI, 0, 0, name});
         aig_.primaryInputs.push_back(id);
         aig_.nameToLit[name] = id << 1;   // positive literal
     }
-
-    // ── Helpers defined here so they can see aig_ and makeAnd ────────────────
 
     auto NOT = [](AigLit a) { return a ^ 1; };  // NOT: flip invert bit (no new node needed)
 
@@ -68,7 +65,7 @@ bool AigBuilder::build(const BlifNetwork& network) {
         return BlockLit;
     };
 
-    // ── Topological sort (recursive DFS) ────────────────────────────────────
+    // Topological sort (recursive DFS)
     std::unordered_map<std::string, size_t> outputToBlock;
     for (size_t blkIdx = 0; blkIdx < network.namesBlocks.size(); ++blkIdx)
         outputToBlock[network.namesBlocks[blkIdx].output] = blkIdx;
@@ -90,12 +87,13 @@ bool AigBuilder::build(const BlifNetwork& network) {
     for (const NamesBlock& blk : network.namesBlocks)
         resolve(blk.output);
 
-    // ── Primary outputs ──────────────────────────────────────────────────────
+    // Primary outputs
     for (const std::string& name : network.primaryOutputs)
         aig_.primaryOutputs.push_back(aig_.nameToLit.at(name));
 
     return true;
 }
+
 
 void AigBuilder::print() const {
     int nPI = 0, nAnd = 0;

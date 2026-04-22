@@ -2,10 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-// ─── static helpers ──────────────────────────────────────────────────────────
 
-// Write a BLIF directive line (e.g. ".inputs a b c ...") with '\' continuation
-// when the line would exceed `wrap` characters.
 static void writeTokenLine(std::ofstream& f,
                             const std::string& directive,
                             const std::vector<std::string>& tokens,
@@ -24,7 +21,6 @@ static void writeTokenLine(std::ofstream& f,
     f << line << '\n';
 }
 
-// ─── BlifWriter::write ───────────────────────────────────────────────────────
 
 bool BlifWriter::write(const std::string&              filePath,
                        const std::string&              modelName,
@@ -70,7 +66,6 @@ bool BlifWriter::write(const std::string&              filePath,
     return true;
 }
 
-// ─── BlifWriter::print ───────────────────────────────────────────────────────
 
 void BlifWriter::print() const {
     std::cout << "\n======BLIF Write Results======" << std::endl;

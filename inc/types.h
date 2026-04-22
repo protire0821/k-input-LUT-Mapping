@@ -32,17 +32,17 @@ using NodeId = int32_t;  // AIG node id
 using AigLit = int32_t;  // AIG literal: (id << 1) | invert_bit
 
 enum class AigNodeType {
-    CONST0,  // constant 0
-    PI,      // primary input
-    AND      // two-input AND
+    CONST0,                 // constant 0
+    PI,                     // primary input
+    AND                     // two-input AND
 };
 
 struct AigNode {
     NodeId       id   = -1;
     AigNodeType  type = AigNodeType::AND;
-    AigLit       fanin0 = 0;      // only valid for AND
-    AigLit       fanin1 = 0;      // only valid for AND
-    std::string  name;            // for PI / PO mapping (optional)
+    AigLit       fanin0 = 0;                // only valid for AND
+    AigLit       fanin1 = 0;                // only valid for AND
+    std::string  name;                      // for PI / PO mapping (optional)
 };
 
 struct Aig {
@@ -54,7 +54,6 @@ struct Aig {
 
 struct Cut {
     std::vector<NodeId> leaves;  // cut inputs (AIG node ids)
-    // Optional bookkeeping:
     int    level = 0;
     double cost  = 0.0;
 };
