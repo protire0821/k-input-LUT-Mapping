@@ -24,7 +24,7 @@ private:
     };
     std::unordered_map<std::pair<AigLit,AigLit>, AigLit, PairHash> andCache_;
 
-    AigLit makeAnd(AigLit a, AigLit b); // structural hashing — too complex to inline
+    AigLit makeAnd(AigLit a, AigLit b); // structural hashing - too complex to inline
 };
 
 #endif // AIG_BUILDER_H

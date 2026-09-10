@@ -13,7 +13,7 @@ AigLit AigBuilder::makeAnd(AigLit a, AigLit b) {
     if (a == b)           return a;   // x & x = x
     if (a == (b ^ 1))     return 0;   // x & ~x = 0
 
-    if (a > b) std::swap(a, b);       // canonical order → halve cache entries
+    if (a > b) std::swap(a, b);       // canonical order -> halve cache entries
 
     auto key = std::make_pair(a, b);
     auto it  = andCache_.find(key);
@@ -39,30 +39,50 @@ bool AigBuilder::build(const BlifNetwork& network) {
         aig_.nameToLit[name] = id << 1;   // positive literal
     }
 
-    auto NOT = [](AigLit a) { return a ^ 1; };  // NOT: flip invert bit (no new node needed)
+    auto NOT = [](AigLit a) { return a ^ 1; };
 
     auto OR = [&](AigLit a, AigLit b) {         // OR via De Morgan: a | b = ~(~a & ~b)
         return makeAnd(a ^ 1, b ^ 1) ^ 1;
     };
 
-    // One .names block (SOP) → OR of AND-chains, one per product term
-    auto buildBlock = [&](const NamesBlock& blk) -> AigLit {
-        AigLit BlockLit = 0; // neutral for OR
-        for (const SopTerm& term : blk.terms) {
+    // Balanced AND tree: depth ceil(log2(n)) vs n-1 for a left-skewed chain
+    std::function<AigLit(std::vector<AigLit>&, size_t, size_t)> balancedAnd =
+        [&](std::vector<AigLit>& v, size_t lo, size_t hi) -> AigLit {
+            if (hi - lo == 1) return v[lo];
+            size_t mid = (lo + hi) / 2;
+            return makeAnd(balancedAnd(v, lo, mid), balancedAnd(v, mid, hi));
+        };
 
-            AigLit termLit = 1; // neutral for AND
+    // Balanced OR tree: same depth reduction applied to the SOP terms
+    std::function<AigLit(std::vector<AigLit>&, size_t, size_t)> balancedOr =
+        [&](std::vector<AigLit>& v, size_t lo, size_t hi) -> AigLit {
+            if (hi - lo == 1) return v[lo];
+            size_t mid = (lo + hi) / 2;
+            return OR(balancedOr(v, lo, mid), balancedOr(v, mid, hi));
+        };
+
+    // One .names block (SOP) -> balanced OR of balanced AND-trees, one per product term
+    auto buildBlock = [&](const NamesBlock& blk) -> AigLit {
+        if (blk.terms.empty()) return AigLit(0);
+
+        std::vector<AigLit> orTerms;
+        orTerms.reserve(blk.terms.size());
+
+        for (const SopTerm& term : blk.terms) {
+            std::vector<AigLit> andLits;
             for (size_t i = 0; i < term.pattern.size(); ++i) {
                 if (term.pattern[i] == -1) continue;      // don't-care
                 AigLit lit = aig_.nameToLit.at(blk.inputs[i]);
                 if (term.pattern[i] == 0) lit ^= 1;       // complement
-                termLit = makeAnd(termLit, lit);
+                andLits.push_back(lit);
             }
-
+            AigLit termLit = andLits.empty() ? AigLit(1)
+                                             : balancedAnd(andLits, 0, andLits.size());
             if (term.onset == 0) termLit = NOT(termLit);
-
-            BlockLit = OR(BlockLit, termLit);
+            orTerms.push_back(termLit);
         }
-        return BlockLit;
+
+        return balancedOr(orTerms, 0, orTerms.size());
     };
 
     // Topological sort (recursive DFS)

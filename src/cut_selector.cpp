@@ -5,7 +5,7 @@
 #include <limits>
 
 
-// ─── Phase 1: Cut Enumeration ───
+// --- Phase 1: Cut Enumeration ---
 void CutSelector::enumerateCuts(const Aig& aig) {
     nodeCuts_.clear();
 
@@ -67,7 +67,7 @@ void CutSelector::enumerateCuts(const Aig& aig) {
 }
 
 
-// ─── Phase 2: Depth-Oriented Mapping ───
+// --- Phase 2: Depth-Oriented Mapping ---
 // Assume AND node has delay 1, PI/CONST0 has delay 0.
 void CutSelector::depthMapping(const Aig& aig) {
     bestCut_.clear();
@@ -90,7 +90,7 @@ void CutSelector::depthMapping(const Aig& aig) {
 
             int lv = 0;
             for (NodeId leaf : cut.leaves) lv = std::max(lv, arrTime_[leaf]); // max leaf level
-            ++lv;                                                             // plus 1 LUT level（self）
+            ++lv;                                                             // plus 1 LUT level (this node itself)
 
             if (lv < bestLv) { bestLv = lv; bestCut_p = &cut; } 
         }
@@ -108,7 +108,7 @@ void CutSelector::depthMapping(const Aig& aig) {
 }
 
 
-// ─── Phase 3: Area Recovery ───
+// --- Phase 3: Area Recovery ---
 // Avoid increasing the depth
 void CutSelector::areaRecovery(const Aig& aig) {
 
@@ -129,7 +129,7 @@ void CutSelector::areaRecovery(const Aig& aig) {
 
     for (AigLit poLit : aig.primaryOutputs) {
         NodeId poId = poLit >> 1;  
-        if (poId < (NodeId)aig.nodes.size() && aig.nodes[poId].type == AigNodeType::AND && !required.count(poId)) {                                   // 避免重複加入
+        if (poId < (NodeId)aig.nodes.size() && aig.nodes[poId].type == AigNodeType::AND && !required.count(poId)) { // skip if already added
             required.insert(poId);
             worklist.push_back(poId);
         }
@@ -197,7 +197,7 @@ void CutSelector::areaRecovery(const Aig& aig) {
         for (const Cut& c : nodeCuts_.at(id)) {
             if (c.leaves.size() == 1 && c.leaves[0] == id) continue;
 
-            // Depth constraint：arrTime < reqTime
+            // Depth constraint: arrTime[leaf] must be strictly less than reqTime[node]
             bool feasible = true;
             for (NodeId leaf : c.leaves) {
                 int arr = arrTime_.count(leaf) ? arrTime_.at(leaf) : 0;

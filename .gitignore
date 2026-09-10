@@ -1,20 +1,26 @@
-# Compiled binaries
-114521123_PA2
+# build artifacts
+build/
+lutmap
+lutmap.exe
 *.o
 *.out
 *.exe
 
+# generated results
 output/
+
+# third-party (ABC checkout)
 abc/
 
+# reports / documents
 *.pdf
+*.docx
+*.tar
 
-# IDE files
+# AI assistant / IDE / OS
+.claude/
 .vscode/
 .idea/
 *.swp
-*.swo
-
-# OS files
 .DS_Store
 Thumbs.db

@@ -1,0 +1,10 @@
+.model inv_po
+.inputs a b
+.outputs y z w
+.names a y
+0 1
+.names a b z
+11 1
+.names b w
+1 1
+.end

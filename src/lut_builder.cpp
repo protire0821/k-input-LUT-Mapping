@@ -24,16 +24,21 @@ static int evalNode(const Aig& aig, NodeId target, const std::unordered_map<Node
 
 
 void LutBuilder::buildLuts(const Aig& aig,
-                            const std::unordered_map<NodeId, Cut>& bestCuts) {
+                            const std::unordered_map<NodeId, Cut>& bestCuts,
+                            const std::vector<std::string>& poNames) {
     luts_.clear();
 
-    std::unordered_map<AigLit,std::string> posLitToName;    // AIG literal  → BLIFname
-    std::unordered_map<NodeId,std::string> invNodeToName;   // AND node id → BLIF name for its inverted output
+    std::unordered_map<AigLit,std::string> posLitToName;    // AIG literal  -> BLIFname
+    std::unordered_map<NodeId,std::string> invNodeToName;   // AND node id -> BLIF name for its inverted output
 
     // Pre-compute name mappings.
+    // A PI node always keeps its own name; other aliases of the same literal
+    // (e.g. a PO that is a plain buffer of a PI) are handled in step 4.
     for (const auto& [name, lit] : aig.nameToLit) {
         NodeId nd = lit >> 1;
         if (!(lit & 1)) {
+            if (nd < (NodeId)aig.nodes.size() &&
+                aig.nodes[nd].type == AigNodeType::PI) continue;
             posLitToName.emplace(lit, name);
         } else if (nd < (NodeId)aig.nodes.size() &&
                    aig.nodes[nd].type == AigNodeType::AND) {
@@ -43,10 +48,10 @@ void LutBuilder::buildLuts(const Aig& aig,
 
     // return the BLIF name for node's positive output.
     auto getNodeName = [&](NodeId nd) -> std::string {
-        auto it = posLitToName.find(nd << 1);
-        if (it != posLitToName.end()) return it->second;
         const AigNode& n = aig.nodes[nd];
         if (n.type == AigNodeType::PI) return n.name;
+        auto it = posLitToName.find(nd << 1);
+        if (it != posLitToName.end()) return it->second;
         return "n" + std::to_string(nd);
     };
 
@@ -141,6 +146,35 @@ void LutBuilder::buildLuts(const Aig& aig,
         inv.output = name;
         inv.terms.push_back(SopTerm{{0}, 1});
         luts_.push_back(inv);
+    }
+
+    // 4. Primary outputs that are not driven by any LUT above:
+    //    - PO == PI                 -> buffer LUT
+    //    - PO == !PI                -> inverter LUT
+    //    - PO == constant 0 / 1     -> constant LUT (no inputs)
+    //    - PO aliasing another name -> buffer / inverter LUT from that signal
+    std::unordered_set<std::string> driven;
+    for (const Lut& l : luts_) driven.insert(l.output);
+
+    for (size_t i = 0; i < poNames.size() && i < aig.primaryOutputs.size(); ++i) {
+        const std::string& po = poNames[i];
+        if (driven.count(po)) continue;
+
+        AigLit lit = aig.primaryOutputs[i];
+        NodeId nd  = lit >> 1;
+        bool   neg = lit & 1;
+
+        Lut l;
+        l.output = po;
+        if (nd == 0 || aig.nodes[nd].type == AigNodeType::CONST0) {
+            // constant: ".names po" followed by "1" for const-1, nothing for const-0
+            if (neg) l.terms.push_back(SopTerm{{}, 1});
+        } else {
+            l.inputs = {getNodeName(nd)};
+            l.terms.push_back(SopTerm{{neg ? 0 : 1}, 1});
+        }
+        luts_.push_back(l);
+        driven.insert(po);
     }
 }
 

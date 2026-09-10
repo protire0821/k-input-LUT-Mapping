@@ -7,9 +7,9 @@
 #include "types.h"
 
 // Three-phase k-LUT mapping:
-//   Phase 1 – enumerateCuts : build all k-feasible cuts per AIG node
-//   Phase 2 – depthMapping  : choose cuts minimising arrival time (depth)
-//   Phase 3 – areaRecovery  : re-choose cuts minimising area flow while
+//   Phase 1 - enumerateCuts : build all k-feasible cuts per AIG node
+//   Phase 2 - depthMapping  : choose cuts minimising arrival time (depth)
+//   Phase 3 - areaRecovery  : re-choose cuts minimising area flow while
 //                             keeping arrival time within required time
 class CutSelector {
 public:
