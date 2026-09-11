@@ -6,13 +6,10 @@ lutmap.exe
 *.out
 *.exe
 
-# generated results
-output/
-
 # third-party (ABC checkout)
 abc/
 
-# reports / documents
+# course documents / reports — do not publish
 *.pdf
 *.docx
 *.tar

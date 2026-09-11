@@ -1,0 +1,81 @@
+.model source.pla
+.inputs v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11
+.outputs v12.0 v12.1 v12.2 v12.3 v12.4 v12.5 v12.6 v12.7
+
+.names v4 v10 n13
+00 1
+.names v4 v11 n14
+10 1
+.names v0 n13 n14 v12.0
+000 1
+010 1
+110 1
+001 1
+101 1
+011 1
+111 1
+.names v5 v10 n17
+00 1
+.names v5 v11 n18
+10 1
+.names v1 n17 n18 v12.1
+000 1
+010 1
+110 1
+001 1
+101 1
+011 1
+111 1
+.names v6 v10 n21
+00 1
+.names v6 v11 n22
+10 1
+.names v2 n21 n22 v12.2
+000 1
+010 1
+110 1
+001 1
+101 1
+011 1
+111 1
+.names v7 v10 n25
+00 1
+.names v7 v11 n26
+10 1
+.names v3 n25 n26 v12.3
+000 1
+010 1
+110 1
+001 1
+101 1
+011 1
+111 1
+.names v4 v8 n29
+10 1
+.names v4 v9 n31
+00 1
+.names v0 n29 n31 v12.4
+010 1
+001 1
+011 1
+.names v5 v8 n34
+10 1
+.names v5 v9 n36
+00 1
+.names v1 n34 n36 v12.5
+010 1
+001 1
+011 1
+.names v6 v8 n39
+10 1
+.names v6 v9 n41
+00 1
+.names v2 n39 n41 v12.6
+010 1
+001 1
+011 1
+.names v7 v8 n44
+10 1
+.names v3 n44 v12.7
+01 1
+.end
