@@ -6,13 +6,16 @@ k-feasible cuts, picks one cut per node (minimum depth first, then area-flow red
 that depth), and writes the mapped LUT network back out as BLIF.
 
 Cut-based LUT mapping is a well-trodden problem and this implements the standard flow rather
-than anything new — it is written from scratch in ~1.5k lines with no dependencies, so it is
+than anything new — it is written from scratch in about 1,100 lines with no dependencies, so it is
 readable end to end if you want to see how the pieces fit together. For production use, reach
 for [ABC](https://github.com/berkeley-abc/abc) (`if -K k`).
 
 ```
 input.blif → BLIF parse → AIG → k-feasible cuts → depth mapping → area recovery → LUT truth tables → output.blif
 ```
+
+**[Try it in your browser →](https://protire0821.github.io/k-input-LUT-Mapping/)** — the same mapper compiled to
+WebAssembly. Load a sample or paste your own netlist; nothing is uploaded.
 
 ## Build
 
@@ -104,10 +107,23 @@ output/  mapped results, testcaseN_cutK.blif
 - Unit tests plus CI that builds, maps, and checks with ABC `cec`.
 - Benchmark table against ABC `if -K k`.
 
+## Web build
+
+`docs/index.html` is a single self-contained page (mapper + samples inlined, ~370 KB) served by
+GitHub Pages. To rebuild it you need [Emscripten](https://emscripten.org)
+(`apt-get install emscripten` works):
+
+```bash
+./web/build.sh          # emcc → web/lutmap.js, then bundles docs/index.html
+```
+
+`web/wasm_api.cpp` is the Emscripten entry point — a thin `lutmap_map(text, k)` wrapper around the
+same pipeline `main.cpp` drives. It is not part of the native build.
+
 ## Test circuits
 
-`testcase2.blif` and `testcase3.blif` are derived from the
-[ISCAS'85](https://en.wikipedia.org/wiki/ISCAS_85) benchmark suite.
+`testcase1.blif` is a small PLA-style circuit. `testcase2.blif` and `testcase3.blif` are derived
+from `alu4` in the MCNC / LGSynth benchmark suite.
 
 ## License
 
